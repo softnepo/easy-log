@@ -88,22 +88,22 @@ open class ELogPack() : ELogContract.Logger {
     }
 
     override fun v(message: String?): ELogContract.Logger = apply {
-        applyLog(ELog.Level.DEBUG, null, message, null)
+        applyLog(ELog.Level.VERBOSE, null, message, null)
     }
 
     override fun e(message: String?): ELogContract.Logger = apply {
-        applyLog(ELog.Level.DEBUG, null, message, null)
+        applyLog(ELog.Level.ERROR, null, message, null)
     }
 
     override fun i(message: String?): ELogContract.Logger = apply {
-        applyLog(ELog.Level.DEBUG, null, message, null)
+        applyLog(ELog.Level.INFO, null, message, null)
     }
 
     override fun w(message: String?): ELogContract.Logger = apply {
-        applyLog(ELog.Level.DEBUG, null, message, null)
+        applyLog(ELog.Level.WARN, null, message, null)
     }
 
     override fun a(message: String?): ELogContract.Logger = apply {
-        applyLog(ELog.Level.DEBUG, null, message, null)
+        applyLog(ELog.Level.ASSERT, null, message, null)
     }
 }

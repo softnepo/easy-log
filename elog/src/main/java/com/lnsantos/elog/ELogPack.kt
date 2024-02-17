@@ -33,7 +33,7 @@ open class ELogPack() : ELogContract.Logger {
         exception: Throwable?,
     ) {
 
-        var finalTag: String = this::class.simpleName ?: ELogPackTAG
+        var finalTag: String = ELogPackTAG
         var messageFinal = message ?: exception?.message.toString()
 
         val isAndroid8OrUpper = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O

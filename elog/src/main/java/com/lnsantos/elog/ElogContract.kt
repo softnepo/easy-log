@@ -21,12 +21,12 @@ open class ELogContract {
         /**
          * show log level INFO
          **/
-        fun i(message: String?) : Logger
+        fun i(message: String?): Logger
 
         /**
          * show log level WARN
          **/
-        fun w(message: String?) : Logger
+        fun w(message: String?): Logger
 
         /**
          * show log level ASSERT

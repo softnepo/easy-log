@@ -1,57 +1,37 @@
 package com.lnsantos.elog
 
-import android.os.Build
 import android.util.Log
-import java.util.regex.Pattern
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.internal.synchronized
 
 internal const val ELogPackTAG = "ELogPack"
 
-open class ELogPack() : ELogContract.Logger {
+@OptIn(InternalCoroutinesApi::class)
+open class ELogPack : ELogContract.Logger {
 
     private val interceptions = mutableListOf<ELog.Interception>()
 
-
-    /**
-     * Find this pattern
-     *
-     * $123
-     * $12345678
-     * $$12
-     * $123$456
-     * */
-    private val anonymousClassPattern = Pattern.compile("(\\$\\d+)+$")
     internal fun setup(
         middlewares: List<ELog.Interception>
     ) {
-        interceptions.addAll(middlewares)
+        synchronized(this) { interceptions.addAll(middlewares) }
     }
 
+    @Synchronized
     private fun applyLog(
         level: ELog.Level,
         tag: String?,
         message: String?,
         exception: Throwable?,
     ) {
-
         var finalTag: String = ELogPackTAG
         var messageFinal = message ?: exception?.message.toString()
 
-        val isAndroid8OrUpper = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-
-        if (exception != null) {
-            val tag = exception.stackTrace
-                .first()
-                .className
-                .substringAfterLast(".")
-
-            if ((finalTag.length + tag.length) > 23 && isAndroid8OrUpper) {
-                finalTag.plus(".$tag")
-            }
-        }
-
-        if (tag != null && (tag.length >= 23 && isAndroid8OrUpper || tag.length < 23)) {
-            finalTag = tag
-        }
+        createTagByException(
+            ignore = tag != null,
+            exception = exception,
+            onResult = { finalTag = it }
+        )
 
         runCatching {
             Log.println(level.getPriority(), finalTag, "--------------------------------------")
@@ -64,7 +44,11 @@ open class ELogPack() : ELogContract.Logger {
                         finalTag,
                         "[$index] Class ${interception.javaClass.simpleName}::Progress ${progress.name}"
                     )
-                    Log.println(level.getPriority(), finalTag, "--------------------------------------")
+                    Log.println(
+                        level.getPriority(),
+                        finalTag,
+                        "--------------------------------------"
+                    )
                 }
 
                 if (progress == ELog.Progress.CONTINUE) {
@@ -83,7 +67,7 @@ open class ELogPack() : ELogContract.Logger {
         }
     }
 
-    override fun d(message: String?): ELogContract.Logger = apply{
+    override fun d(message: String?): ELogContract.Logger = apply {
         applyLog(ELog.Level.DEBUG, null, message, null)
     }
 
@@ -105,5 +89,20 @@ open class ELogPack() : ELogContract.Logger {
 
     override fun a(message: String?): ELogContract.Logger = apply {
         applyLog(ELog.Level.ASSERT, null, message, null)
+    }
+
+    private fun createTagByException(
+        ignore: Boolean = false,
+        exception: Throwable?,
+        onResult: (String) -> Unit
+    ) {
+
+        if (ignore) return
+
+        exception?.stackTrace
+            ?.first()
+            ?.className
+            ?.substringAfterLast(".")
+            ?.also { onResult(it) }
     }
 }

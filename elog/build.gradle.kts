@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.lnsantos.elog"
-    compileSdk = 34
+    compileSdk = 22
 
     defaultConfig {
         minSdk = 21

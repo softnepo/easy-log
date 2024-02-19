@@ -1,8 +1,14 @@
 package com.lnsantos.elog
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.internal.ChannelFlow
 import kotlinx.coroutines.internal.synchronized
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.lang.Exception
 
 internal const val ELogPackTAG = "ELogPack"
 
@@ -23,7 +29,8 @@ open class ELogPack : ELogContract.Logger {
         tag: String?,
         message: String?,
         exception: Throwable?,
-    ) {
+    ) = runBlocking {
+
         var finalTag: String = ELogPackTAG
         var messageFinal = message ?: exception?.message.toString()
 
@@ -33,28 +40,33 @@ open class ELogPack : ELogContract.Logger {
             onResult = { finalTag = it }
         )
 
+        val scope = CoroutineScope(Dispatchers.IO)
         runCatching {
-            Log.println(level.getPriority(), finalTag, "--------------------------------------")
-            interceptions.forEachIndexed { index, interception ->
-                val progress = interception.onInterception(level, messageFinal, exception)
+            scope.launch {
+                interceptions.mapIndexed { index, interception ->
+                    launch {
+                        val progress = interception.onInterception(level, messageFinal, exception)
 
-                if (ELog.getShowInterceptionProgress()) {
-                    Log.println(
-                        ELog.Level.DEBUG.getPriority(),
-                        finalTag,
-                        "[$index] Class ${interception.javaClass.simpleName}::Progress ${progress.name}"
-                    )
-                    Log.println(
-                        level.getPriority(),
-                        finalTag,
-                        "--------------------------------------"
-                    )
-                }
+                        if (ELog.getShowInterceptionProgress()) {
+                            Log.println(
+                                ELog.Level.DEBUG.getPriority(),
+                                finalTag,
+                                "[$index] Class ${interception.javaClass.simpleName}::Progress ${progress.name}"
+                            )
+                            Log.println(
+                                level.getPriority(),
+                                finalTag,
+                                "--------------------------------------"
+                            )
+                        }
 
-                if (progress == ELog.Progress.CONTINUE) {
-                    Log.println(level.getPriority(), finalTag, messageFinal)
+                        if (progress == ELog.Progress.CONTINUE) {
+                            Log.println(level.getPriority(), finalTag, messageFinal)
+                        }
+                    }.join()
                 }
-            }
+                Log.println(level.getPriority(), finalTag, "--------------------------------------")
+            }.join()
         }.onSuccess {
             Log.println(level.getPriority(), finalTag, "--------------------------------------")
         }.onFailure {
@@ -67,8 +79,28 @@ open class ELogPack : ELogContract.Logger {
         }
     }
 
+    @Synchronized
+    override fun tag(tag: String): ELogContract.Logger = apply {
+        // TODO
+    }
+
     override fun d(message: String?): ELogContract.Logger = apply {
         applyLog(ELog.Level.DEBUG, null, message, null)
+    }
+
+    override fun d(exception: Throwable?): ELogContract.Logger = apply {
+        val tag = createTagByException(exception = exception)
+        applyLog(ELog.Level.DEBUG, tag, null, exception)
+    }
+
+    override fun <T> d(clazz: Class<T>?, message: String?): ELogContract.Logger = apply {
+        val tag = clazz?.simpleName
+        applyLog(ELog.Level.DEBUG, tag, message, null)
+    }
+
+    override fun <T> d(clazz: Class<T>?, exception: Throwable): ELogContract.Logger = apply {
+        val tag = clazz?.simpleName
+        applyLog(ELog.Level.DEBUG, tag, null, exception)
     }
 
     override fun v(message: String?): ELogContract.Logger = apply {
@@ -91,18 +123,31 @@ open class ELogPack : ELogContract.Logger {
         applyLog(ELog.Level.ASSERT, null, message, null)
     }
 
-    private fun createTagByException(
+    private inline fun createTagByException(
         ignore: Boolean = false,
         exception: Throwable?,
-        onResult: (String) -> Unit
+        onResult: (tagFiend: String) -> Unit
     ) {
 
         if (ignore) return
 
-        exception?.stackTrace
+        (exception ?: Exception()).stackTrace
             ?.first()
             ?.className
             ?.substringAfterLast(".")
             ?.also { onResult(it) }
+    }
+
+    private fun createTagByException(
+        ignore: Boolean = false,
+        exception: Throwable?
+    ) : String? {
+
+        if (ignore) return null
+
+        return (exception ?: Exception()).stackTrace
+            ?.first()
+            ?.className
+            ?.substringAfterLast(".")
     }
 }

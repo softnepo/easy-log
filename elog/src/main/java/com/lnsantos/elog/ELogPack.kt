@@ -31,7 +31,7 @@ open class ELogPack : ELogContract.Logger {
         exception: Throwable?,
     ) = runBlocking {
 
-        var finalTag: String = ELogPackTAG
+        var finalTag: String = tag ?: ELogPackTAG
         var messageFinal = message ?: exception?.message.toString()
 
         createTagByException(
@@ -41,6 +41,8 @@ open class ELogPack : ELogContract.Logger {
         )
 
         val scope = CoroutineScope(Dispatchers.IO)
+        val break_ = "--------------------------------------"
+
         runCatching {
             scope.launch {
                 interceptions.mapIndexed { index, interception ->
@@ -53,11 +55,7 @@ open class ELogPack : ELogContract.Logger {
                                 finalTag,
                                 "[$index] Class ${interception.javaClass.simpleName}::Progress ${progress.name}"
                             )
-                            Log.println(
-                                level.getPriority(),
-                                finalTag,
-                                "--------------------------------------"
-                            )
+                            Log.println(level.getPriority(), finalTag, break_)
                         }
 
                         if (progress == ELog.Progress.CONTINUE) {
@@ -65,17 +63,17 @@ open class ELogPack : ELogContract.Logger {
                         }
                     }.join()
                 }
-                Log.println(level.getPriority(), finalTag, "--------------------------------------")
+                Log.println(level.getPriority(), finalTag, break_)
             }.join()
         }.onSuccess {
-            Log.println(level.getPriority(), finalTag, "--------------------------------------")
+            Log.println(level.getPriority(), finalTag, break_)
         }.onFailure {
             Log.println(
                 ELog.Level.ERROR.getPriority(),
                 this::class.simpleName,
                 it.stackTraceToString()
             )
-            Log.println(level.getPriority(), finalTag, "--------------------------------------")
+            Log.println(level.getPriority(), finalTag, break_)
         }
     }
 
@@ -89,18 +87,15 @@ open class ELogPack : ELogContract.Logger {
     }
 
     override fun d(exception: Throwable?): ELogContract.Logger = apply {
-        val tag = createTagByException(exception = exception)
-        applyLog(ELog.Level.DEBUG, tag, null, exception)
+        applyLog(ELog.Level.DEBUG, null, null, exception)
     }
 
-    override fun <T> d(clazz: Class<T>?, message: String?): ELogContract.Logger = apply {
-        val tag = clazz?.simpleName
-        applyLog(ELog.Level.DEBUG, tag, message, null)
+    override fun d(clazz: Any?, message: String?): ELogContract.Logger = apply {
+        applyLog(ELog.Level.DEBUG, clazz.captureTag(), message, null)
     }
 
-    override fun <T> d(clazz: Class<T>?, exception: Throwable): ELogContract.Logger = apply {
-        val tag = clazz?.simpleName
-        applyLog(ELog.Level.DEBUG, tag, null, exception)
+    override fun d(clazz: Any?, exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.DEBUG, clazz.captureTag(), null, exception)
     }
 
     override fun v(message: String?): ELogContract.Logger = apply {
@@ -149,5 +144,9 @@ open class ELogPack : ELogContract.Logger {
             ?.first()
             ?.className
             ?.substringAfterLast(".")
+    }
+
+    private fun Any?.captureTag() : String? {
+        return this?.run { this::class.java.simpleName }
     }
 }

@@ -21,12 +21,12 @@ open class ELogContract {
         /**
          * show log level DEBUG, with custom tag by class
          * **/
-        fun <T> d(clazz: Class<T>? = null, message: String?): Logger
+        fun d(clazz: Any? = null, message: String?): Logger
 
         /**
          * show log level DEBUG
          * **/
-        fun <T> d(clazz: Class<T>? = null, exception: Throwable): Logger
+        fun d(clazz: Any? = null, exception: Throwable): Logger
 
         /**
          * show log level VERBOSE

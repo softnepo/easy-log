@@ -16,6 +16,8 @@ class MainActivity : AppCompatActivity(), ELog.Interception {
         ELog.w("Teste de log de warn")
         ELog.a("Teste de log de asset")
         ELog.v("Teste de log de verbose")
+
+        ELog.d(this, "teste")
     }
 
     override fun onInterception(

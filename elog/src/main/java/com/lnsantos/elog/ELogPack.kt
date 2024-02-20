@@ -79,7 +79,7 @@ open class ELogPack : ELogContract.Logger {
 
     @Synchronized
     override fun tag(tag: String): ELogContract.Logger = apply {
-        // TODO
+        throw NotImplementedError("tag isolate not implemented")
     }
 
     override fun d(message: String?): ELogContract.Logger = apply {

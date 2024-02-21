@@ -54,6 +54,21 @@ open class ELogContract {
         fun e(message: String?): Logger
 
         /**
+         * show log level ERROR
+         **/
+        fun e(exception: Throwable): Logger
+
+        /**
+         * show log level ERROR
+         **/
+        fun e(clazz: Any? = null, message: String?): Logger
+
+        /**
+         * show log level ERROR
+         **/
+        fun e(clazz: Any? = null, exception: Throwable): Logger
+
+        /**
          * show log level INFO
          **/
         fun i(message: String?): Logger

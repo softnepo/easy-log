@@ -133,6 +133,18 @@ open class ELogPack : ELogContract.Logger {
         applyLog(ELog.Level.INFO, null, message, null)
     }
 
+    override fun i(exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.INFO, null, null, exception)
+    }
+
+    override fun i(clazz: Any?, message: String?): ELogContract.Logger = apply {
+        applyLog(ELog.Level.INFO, clazz.captureTag(), message, null)
+    }
+
+    override fun i(clazz: Any?, exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.INFO, clazz.captureTag(), null, exception)
+    }
+
     override fun w(message: String?): ELogContract.Logger = apply {
         applyLog(ELog.Level.WARN, null, message, null)
     }

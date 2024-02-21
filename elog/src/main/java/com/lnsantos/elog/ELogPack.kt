@@ -101,6 +101,18 @@ open class ELogPack : ELogContract.Logger {
         applyLog(ELog.Level.VERBOSE, null, message, null)
     }
 
+    override fun v(exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.VERBOSE, null, null, exception)
+    }
+
+    override fun v(clazz: Any?, message: String?): ELogContract.Logger = apply {
+        applyLog(ELog.Level.VERBOSE, clazz.captureTag(), message, null)
+    }
+
+    override fun v(clazz: Any?, exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.VERBOSE, clazz.captureTag(), null, exception)
+    }
+
     override fun e(message: String?): ELogContract.Logger = apply {
         applyLog(ELog.Level.ERROR, null, message, null)
     }
@@ -135,7 +147,7 @@ open class ELogPack : ELogContract.Logger {
     private fun createTagByException(
         ignore: Boolean = false,
         exception: Throwable?
-    ) : String? {
+    ): String? {
 
         if (ignore) return null
 
@@ -145,7 +157,7 @@ open class ELogPack : ELogContract.Logger {
             ?.substringAfterLast(".")
     }
 
-    private fun Any?.captureTag() : String? {
+    private fun Any?.captureTag(): String? {
         return this?.run { this::class.java.simpleName }
     }
 }

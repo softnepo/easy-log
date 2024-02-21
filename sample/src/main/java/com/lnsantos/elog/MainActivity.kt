@@ -2,6 +2,8 @@ package com.lnsantos.elog
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), ELog.Interception {
 
@@ -16,7 +18,12 @@ class MainActivity : AppCompatActivity(), ELog.Interception {
         ELog.w("Teste de log de warn")
         ELog.a("Teste de log de asset")
         ELog.v("Teste de log de verbose")
-
+        GlobalScope.launch {
+            launch { ELog.d(this@MainActivity, "teste 1") }
+            launch { ELog.d(this@MainActivity, "teste 2") }
+            launch { ELog.v(this@MainActivity, "teste 1") }
+            launch { ELog.v("teste 2") }
+        }
         ELog.d(this, "teste")
     }
 

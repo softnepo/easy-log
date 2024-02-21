@@ -79,12 +79,12 @@ open class ELogContract {
         fun i(exception: Throwable): Logger
 
         /**
-         * show log level ERROR
+         * show log level INFO
          **/
         fun i(clazz: Any? = null, message: String?): Logger
 
         /**
-         * show log level ERROR
+         * show log level INFO
          **/
         fun i(clazz: Any? = null, exception: Throwable): Logger
         /**
@@ -92,6 +92,20 @@ open class ELogContract {
          **/
         fun w(message: String?): Logger
 
+        /**
+         * show log level WARN
+         **/
+        fun w(exception: Throwable): Logger
+
+        /**
+         * show log level WARN
+         **/
+        fun w(clazz: Any? = null, message: String?): Logger
+
+        /**
+         * show log level WARN
+         **/
+        fun w(clazz: Any? = null, exception: Throwable): Logger
         /**
          * show log level ASSERT
          **/

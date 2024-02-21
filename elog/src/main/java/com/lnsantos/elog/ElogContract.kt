@@ -106,9 +106,24 @@ open class ELogContract {
          * show log level WARN
          **/
         fun w(clazz: Any? = null, exception: Throwable): Logger
+
         /**
          * show log level ASSERT
          **/
         fun a(message: String?): Logger
+        /**
+         * show log level ASSERT
+         **/
+        fun a(exception: Throwable): Logger
+
+        /**
+         * show log level ASSERT
+         **/
+        fun a(clazz: Any? = null, message: String?): Logger
+
+        /**
+         * show log level ASSERT
+         **/
+        fun a(clazz: Any? = null, exception: Throwable): Logger
     }
 }

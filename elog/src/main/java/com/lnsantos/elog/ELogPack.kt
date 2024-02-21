@@ -165,6 +165,18 @@ open class ELogPack : ELogContract.Logger {
         applyLog(ELog.Level.ASSERT, null, message, null)
     }
 
+    override fun a(exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.ASSERT, null, null, exception)
+    }
+
+    override fun a(clazz: Any?, message: String?): ELogContract.Logger = apply {
+        applyLog(ELog.Level.ASSERT, clazz.captureTag(), message, null)
+    }
+
+    override fun a(clazz: Any?, exception: Throwable): ELogContract.Logger = apply {
+        applyLog(ELog.Level.ASSERT, clazz.captureTag(), null, exception)
+    }
+
     private inline fun createTagByException(
         ignore: Boolean = false,
         exception: Throwable?,

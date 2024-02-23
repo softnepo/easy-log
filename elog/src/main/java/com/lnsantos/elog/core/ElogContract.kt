@@ -1,6 +1,4 @@
-package com.lnsantos.elog
-
-import java.lang.Exception
+package com.lnsantos.elog.core
 
 open class ELogContract {
 

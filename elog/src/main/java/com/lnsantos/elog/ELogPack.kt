@@ -1,6 +1,8 @@
 package com.lnsantos.elog
 
 import android.util.Log
+import com.lnsantos.elog.annotation.ELogExperimental
+import com.lnsantos.elog.core.ELogContract
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -12,6 +14,7 @@ import java.lang.Exception
 internal const val ELogPackTAG = "ELogPack"
 
 @OptIn(InternalCoroutinesApi::class)
+@ELogExperimental
 open class ELogPack : ELogContract.Logger {
 
     private val interceptions = mutableListOf<ELog.Interception>()

@@ -2,9 +2,11 @@ package com.lnsantos.elog
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.lnsantos.elog.annotation.ELogExperimental
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+@OptIn(ELogExperimental::class)
 class MainActivity : AppCompatActivity(), ELog.Interception {
 
     override fun onCreate(savedInstanceState: Bundle?) {

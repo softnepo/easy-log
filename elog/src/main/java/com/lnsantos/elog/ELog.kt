@@ -1,5 +1,9 @@
 package com.lnsantos.elog
 
+import com.lnsantos.elog.annotation.ELogExperimental
+import com.lnsantos.elog.core.ELogContract
+
+@ELogExperimental
 class ELog private constructor() : ELogContract() {
 
     init {

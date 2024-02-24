@@ -1,6 +1,7 @@
 package com.lnsantos.elog.annotation
 
 import kotlin.RequiresOptIn
+import kotlin.coroutines.RestrictsSuspension
 
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)

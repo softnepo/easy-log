@@ -6,14 +6,16 @@ import com.lnsantos.elog.annotation.ELogExperimental
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+
 @OptIn(ELogExperimental::class)
 class MainActivity : AppCompatActivity(), ELog.Interception {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ELog.registerInterception(this)
-            .initialization(true)
+            .initialization(false)
 
+        ELog.v("Before Android 4.1, method android.graphics.PorterDuffColorFilter androidx.vectordrawable.graphics.drawable.VectorDrawableCompat.updateTintFilter(android.graphics.PorterDuffColorFilter, android.content.res.ColorStateList, android.graphics.PorterDuff) would have incorrectly overridden the package-private method in android.graphics.drawable.Drawable")
         ELog.i("Teste de log de info")
         ELog.d("Teste de log de debug")
         ELog.e("Teste de log de erro")

@@ -15,4 +15,4 @@ implementation("release in future")
 // TODO
 
 ## Print (Logic)
-![Draw logic](documents/assert/en_draw.jpg)
+![Draw logic](documents/assert/en_draw_v2.jpg)

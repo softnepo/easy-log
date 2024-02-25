@@ -13,3 +13,6 @@ implementation("release in future")
 ## How use in android
 
 // TODO
+
+## Print (Logic)
+![Draw logic](documents/assert/en_draw.jpg)

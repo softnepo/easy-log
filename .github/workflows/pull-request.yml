@@ -3,7 +3,7 @@ run-name: PR Validation executed by @${{ github.actor }}
 on: pull_request
 jobs:
 
-  CHECK:
+  CheckPullRequest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

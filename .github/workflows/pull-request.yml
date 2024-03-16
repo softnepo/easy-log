@@ -5,4 +5,4 @@ jobs:
   verify-unit-test:
     runs-on: ubuntu-latest
     steps:
-      - run: ./gradle elog:testDebugUnitTest
+      - run: gradle elog:testDebugUnitTest

@@ -3,7 +3,7 @@ run-name: PR Validation executed by @${{ github.actor }}
 on: pull_request
 jobs:
 
-  CHECK-UnitTest:
+  CHECK:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,5 +15,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
 
-      - run: ./gradlew elog:testDebugUnitTest
+      - name: Verify build library
+        run: ./gradlew elog:assemble
+
+      - name: Verify unit test
+        run: ./gradlew elog:testDebugUnitTest
 

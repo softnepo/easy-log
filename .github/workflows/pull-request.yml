@@ -17,22 +17,3 @@ jobs:
 
       - run: ./gradlew elog:testDebugUnitTest
 
-      - name: Comment on failure
-        if: steps.job.status == 'failure'
-        uses: octokit/action-comment@v1
-        with:
-          repo: ${{ github.repository }}
-          issue_number: ${{ github.event.issue.number }}
-          body: "Verifique os testes unitarios"
-
-      - uses: actions/checkout@v2
-      - uses: octokit/action-get-job-status@v1  # Get job status
-        id: get-job-status
-
-      - name: Comment on success
-        if: steps.get-job-status.outputs.status != 'failure'
-        uses: octokit/action-comment@v1
-        with:
-          repo: ${{ github.repository }}
-          issue_number: ${{ github.event.issue.number }}
-          body: "Todos os testes passaram com sucesso =)"

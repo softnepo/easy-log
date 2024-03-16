@@ -1,0 +1,8 @@
+name: PR Validation
+run-name: PR Validation executed by @${{ github.actor }}
+on: pull_request
+jobs:
+  verify-unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gradle elog:testReleaseUnitTest

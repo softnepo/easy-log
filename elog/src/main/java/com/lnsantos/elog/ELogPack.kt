@@ -7,14 +7,20 @@ import com.lnsantos.elog.print.LogSimplePrint
 import com.lnsantos.elog.print.ProgressAnalyticsPrint
 import com.lnsantos.elog.util.captureTag
 import com.lnsantos.elog.util.createTagByException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.coroutines.CoroutineContext
 
 @OptIn(InternalCoroutinesApi::class)
 @ELogExperimental
-open class ELogPack : ELogContract.Logger {
+open class ELogPack(
+    private val dispatcher: CoroutineContext = Dispatchers.IO
+) : ELogContract.Logger {
 
     private val interceptions = mutableListOf<ELog.Interception>()
 
@@ -32,6 +38,9 @@ open class ELogPack : ELogContract.Logger {
         exception: Throwable?,
     ) = runBlocking {
 
+        val mutexProgressAnalytics = Mutex()
+        val mutexLogSimple = Mutex()
+
         var finalTag: String = tag ?: this@ELogPack::class.simpleName ?: "ELogPack"
         val messageFinal = message ?: exception?.message.toString()
         val printProgressAnalytics = ProgressAnalyticsPrint()
@@ -48,26 +57,37 @@ open class ELogPack : ELogContract.Logger {
         }
 
         runCatching {
-            interceptions.mapIndexed { index, interception ->
-                launch {
+            interceptions.mapIndexed { _, interception ->
+                launch(dispatcher) {
+
                     val progress = interception.onInterception(level, messageFinal, exception)
 
-                    printProgressAnalytics.onPrint(
-                        tag = finalTag,
-                        level = level,
-                        interception = interception,
-                        progress = progress,
-                        message = null
-                    )
-
-                    if (progress == ELog.Progress.CONTINUE) {
-                        printLogSimple.onPrint(
+                    mutexProgressAnalytics.runBlockWithLog<ProgressAnalyticsPrint>(
+                        level,
+                        tag
+                    ) {
+                        printProgressAnalytics.onPrint(
                             tag = finalTag,
                             level = level,
                             interception = interception,
                             progress = progress,
-                            message = messageFinal
+                            message = null
                         )
+                    }
+
+                    if (progress == ELog.Progress.CONTINUE) {
+                        mutexLogSimple.runBlockWithLog<LogSimplePrint>(
+                            level,
+                            tag
+                        ) {
+                            printLogSimple.onPrint(
+                                tag = finalTag,
+                                level = level,
+                                interception = interception,
+                                progress = progress,
+                                message = messageFinal
+                            )
+                        }
                     }
                 }.join()
             }
@@ -78,6 +98,44 @@ open class ELogPack : ELogContract.Logger {
                 ELog.Level.ERROR.getPriority(),
                 this::class.simpleName,
                 it.stackTraceToString()
+            )
+        }
+    }
+
+    private suspend inline fun <reified T> Mutex.runBlockWithLog(
+        level: ELog.Level,
+        tag: String? = null,
+        action: () -> Unit
+    ) {
+        try {
+            registerLogAnalytic<T>(
+                level,
+                tag
+            )
+            withLock(owner = T::class.simpleName) { action() }
+        } catch (e: Throwable) {
+            Log.println(
+                level.getPriority(),
+                tag,
+                e.printStackTrace().toString()
+            )
+        } finally {
+            registerLogAnalytic<T>(
+                level,
+                tag
+            )
+        }
+    }
+
+    private inline fun <reified T> Mutex.registerLogAnalytic(
+        level: ELog.Level,
+        tag: String? = null
+    ) {
+        if (ELog.getShowInterceptionProgress()) {
+            Log.println(
+                level.getPriority(),
+                tag,
+                "state ${T::class.simpleName} locked is $isLocked"
             )
         }
     }
@@ -163,7 +221,7 @@ open class ELogPack : ELogContract.Logger {
         applyLog(ELog.Level.WARN, clazz.captureTag(), message, null)
     }
 
-    override fun w(clazz: Any?, exception: Throwable): ELogContract.Logger= apply {
+    override fun w(clazz: Any?, exception: Throwable): ELogContract.Logger = apply {
         applyLog(ELog.Level.WARN, clazz.captureTag(), null, exception)
     }
 

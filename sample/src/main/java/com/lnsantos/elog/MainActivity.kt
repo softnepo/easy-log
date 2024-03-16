@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity(), ELog.Interception {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ELog.registerInterception(this)
-            .initialization(false)
+            .initialization(true)
 
         ELog.v("Before Android 4.1, method android.graphics.PorterDuffColorFilter androidx.vectordrawable.graphics.drawable.VectorDrawableCompat.updateTintFilter(android.graphics.PorterDuffColorFilter, android.content.res.ColorStateList, android.graphics.PorterDuff) would have incorrectly overridden the package-private method in android.graphics.drawable.Drawable")
         ELog.i("Teste de log de info")
@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity(), ELog.Interception {
         ELog.w("Teste de log de warn")
         ELog.a("Teste de log de asset")
         ELog.v("Teste de log de verbose")
+
         GlobalScope.launch {
             launch { ELog.d(this@MainActivity, "teste 1") }
             launch { ELog.d(this@MainActivity, "teste 2") }
